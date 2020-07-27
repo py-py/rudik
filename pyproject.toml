@@ -1,0 +1,84 @@
+[tool.black]
+line-length = 99
+exclude = '''
+(
+  /(
+      \.github
+    | \.storybook
+    | scripts
+    | docs
+    | conf
+    | node_modules
+  )/
+  | fabfile.py
+)
+'''
+
+[tool.isort]
+line_length = 99
+indent = '    '
+include_trailing_comma = true
+multi_line_output = 3
+force_grid_wrap = 0
+lines_between_sections = 1
+use_parentheses = true
+force_single_line = true
+order_by_type = true
+skip = "setup.py"
+not_skip = "__init__.py"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = migrations,py27,py37
+skipsdist = true
+[cleanup]
+whitelist_externals =
+  find
+commands =
+  find {toxinidir}/datatap -type f -name "*.pyc" -delete
+  find {toxinidir}/datatap -type d -name "__pycache__" -delete
+[pipupgrade]
+commands =
+  {envpython} -m pip install --upgrade pip
+[testenv]
+passenv =
+    DJANGO_SETTINGS_MODULE
+    DB_HOST
+    DB_PORT
+    DB_NAME
+    DB_USER
+    PGPASSWORD
+setenv =
+    PYTHONPATH = {toxinidir}/datatap
+    PYTHONWARNINGS=once::DeprecationWarning
+whitelist_externals =
+    cp
+    bash
+    find
+commands_pre =
+    pip install -r {toxinidir}/requirements-dev.txt -q
+    py27: cp {toxinidir}/conf/sitecustomize.py  {envsitepackagesdir}/../
+    pipdeptree --warn fail
+    pip check
+commands =
+    {[pipupgrade]commands}
+    bash -c 'pip freeze | safety check --stdin --cache -i 38330 -i 38330 -i 38414 -i 38369 -i 38449 -i 38450 -i 38451 -i 38452'
+    pytest --cache-clear --durations=20 --reuse-db {posargs:datatap}
+    {[cleanup]commands}
+[testenv:migrations]
+basepython = python2.7
+passenv =
+    PYTHONPATH
+    DJANGO_SETTINGS_MODULE
+    DB_HOST
+    DB_PORT
+    DB_NAME
+    DB_USER
+    PGPASSWORD
+setenv =
+    PYTHONHASHSEED = 0
+commands=
+    {toxinidir}/datatap/manage.py makemigrations --check --dry-run
+    {toxinidir}/datatap/manage.py check --deploy
+"""
