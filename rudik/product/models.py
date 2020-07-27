@@ -23,9 +23,11 @@ class AbstractImage(TimeStampedModel, models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        if not self.pk:
-            fk_field = getattr(self, self.fk_field)
-            if not fk_field.images.filter(is_default=True).exists():
+        queryset = getattr(self, self.fk_field).images.all()
+        if self.is_default:
+            queryset.update(is_default=False)
+        else:
+            if not queryset.filter(is_default=True).exists():
                 self.is_default = True
         super(AbstractImage, self).save(*args, **kwargs)
 
