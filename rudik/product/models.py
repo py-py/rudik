@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -5,15 +7,42 @@ from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 
 
-class CategoryImage(TimeStampedModel, models.Model):
-    image = models.ImageField()
+def upload_to(instance, filename):
+    return os.path.join(instance.upload_folder, filename)
+
+
+class AbstractImage(TimeStampedModel, models.Model):
+    upload_folder = None
+    fk_field = None
+
+    image = models.ImageField(upload_to=upload_to)
+    is_default = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            fk_field = getattr(self, self.fk_field)
+            if not fk_field.images.filter(is_default=True).exists():
+                self.is_default = True
+        super(AbstractImage, self).save(*args, **kwargs)
+
+
+class CategoryImage(AbstractImage):
+    upload_folder = "category"
+    fk_field = "category"
+
     category = models.ForeignKey(
         "product.Category", on_delete=models.CASCADE, related_name="images"
     )
 
 
-class ProductImage(TimeStampedModel, models.Model):
-    image = models.ImageField()
+class ProductImage(AbstractImage):
+    upload_folder = "product"
+    fk_field = "product"
+
     product = models.ForeignKey("product.Product", on_delete=models.CASCADE, related_name="images")
 
 
