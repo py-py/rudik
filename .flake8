@@ -1,0 +1,4 @@
+[flake8]
+exclude = .git,*migrations*,ci/*,docs/*,node_modules/*,scripts/*
+max-line-length = 99
+extend-ignore = E203,A003,I004
