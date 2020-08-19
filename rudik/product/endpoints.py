@@ -15,8 +15,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.root_nodes()
+    queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        queryset = super(CategoryViewSet, self).get_queryset()
+        if self.action == "list":
+            return Category.objects.root_nodes()
+        return queryset
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -28,3 +34,4 @@ class ProductSerializer(serializers.ModelSerializer):
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    filterset_fields = ["category"]
