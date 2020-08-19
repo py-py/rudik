@@ -2,16 +2,23 @@ from rest_framework import serializers
 from rest_framework import viewsets
 from rest_framework_recursive.fields import RecursiveField
 
-from .models import Category
-from .models import Product
+from ..models import Category
+from ..models import CategoryImage
+
+
+class CategoryImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CategoryImage
+        fields = ["image", "is_default"]
 
 
 class CategorySerializer(serializers.ModelSerializer):
     children = RecursiveField(many=True)
+    images = CategoryImageSerializer(many=True)
 
     class Meta:
         model = Category
-        fields = ["id", "name", "children"]
+        fields = ["id", "name", "children", "images"]
 
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -23,15 +30,3 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
         if self.action == "list":
             return Category.objects.root_nodes()
         return queryset
-
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = ["id", "name", "category"]
-
-
-class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    filterset_fields = ["category"]
