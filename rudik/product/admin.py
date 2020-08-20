@@ -10,12 +10,20 @@ from .models import Product
 from .models import ProductImage
 
 
+class ImageMixin(object):
+    class Media:
+        js = (
+            "admin/js/jquery.init.js",
+            "product/js/is_default.js",
+        )
+
+
 @admin.register(Color, site=rudik_site)
 class ColorAdmin(admin.ModelAdmin):
     list_display = ["__str__", "color"]
 
 
-class CategoryImageTabularInline(admin.TabularInline):
+class CategoryImageTabularInline(ImageMixin, admin.TabularInline):
     model = CategoryImage
     extra = 1
 
@@ -25,7 +33,7 @@ class CategoryAdmin(MPTTModelAdmin):
     inlines = [CategoryImageTabularInline]
 
 
-class ProductImageTabularInline(admin.TabularInline):
+class ProductImageTabularInline(ImageMixin, admin.TabularInline):
     model = ProductImage
     extra = 1
 
