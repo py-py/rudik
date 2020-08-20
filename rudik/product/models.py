@@ -84,3 +84,11 @@ class Product(TimeStampedModel, models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def cost(self):
+        return self.purchase_price + self.delivery_price
+
+    @property
+    def margin(self):
+        return self.price - self.cost
