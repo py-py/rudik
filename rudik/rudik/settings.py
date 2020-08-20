@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django_filters",
     "rest_framework",
     "mptt",
+    "colorfield",
     "core",
     "product",
 ]

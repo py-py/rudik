@@ -1,5 +1,6 @@
 import os
 
+from colorfield.fields import ColorField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
@@ -9,6 +10,14 @@ from mptt.models import MPTTModel
 
 def upload_to(instance, filename):
     return os.path.join(instance.upload_folder, filename)
+
+
+class Color(models.Model):
+    name = models.CharField(max_length=256)
+    color = ColorField(default="#000000")
+
+    def __str__(self):
+        return self.name
 
 
 class AbstractImage(TimeStampedModel, models.Model):
@@ -68,6 +77,10 @@ class Product(TimeStampedModel, models.Model):
     category = models.ForeignKey(
         "product.Category", on_delete=models.PROTECT, related_name="products"
     )
+    color = models.ForeignKey("product.Color", on_delete=models.PROTECT, related_name="products")
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    delivery_price = models.DecimalField(max_digits=8, decimal_places=2)
+    purchase_price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
         return self.name
