@@ -67,7 +67,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("name", models.CharField(max_length=256)),
-                ("color", ColorField(default="#000000", max_length=18)),
+                ("color", ColorField(default="#FFFFFF", max_length=18)),
             ],
         ),
         migrations.CreateModel(

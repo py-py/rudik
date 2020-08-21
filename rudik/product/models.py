@@ -15,7 +15,7 @@ def upload_to(instance, filename):
 
 class Color(models.Model):
     name = models.CharField(max_length=256)
-    color = ColorField(default="#000000")
+    color = ColorField(default="#FFFFFF")
 
     def __str__(self):
         return self.name
