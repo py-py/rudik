@@ -91,3 +91,29 @@ class Product(TimeStampedModel, models.Model):
     @property
     def margin(self):
         return self.price - self.cost
+
+
+class ConfigurationType(TimeStampedModel, models.Model):
+    name = models.CharField(max_length=256)
+
+    def __str__(self):
+        return self.name
+
+
+class Configuration(TimeStampedModel, models.Model):
+    type = models.ForeignKey("product.ConfigurationType", on_delete=models.CASCADE)
+    value = models.CharField(max_length=256)
+
+    def __str__(self):
+        return "{} ({})".format(self.type.name, self.value)
+
+
+class ProductVariant(TimeStampedModel, models.Model):
+    product = models.ForeignKey(
+        "product.Product", on_delete=models.CASCADE, related_name="variants"
+    )
+    configurations = models.ManyToManyField("product.Configuration")
+    qty = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return self.product.name
