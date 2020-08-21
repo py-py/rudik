@@ -1,11 +1,12 @@
 import os
 
-from colorfield.fields import ColorField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
+
+from pyrudik.django.fields import ColorField
 
 
 def upload_to(instance, filename):
