@@ -11,6 +11,10 @@ from .models import ProductImage
 
 
 class ImageMixin(object):
+    def get_queryset(self, request):
+        qs = super(ImageMixin, self).get_queryset(request)
+        return qs.order_by("-is_default")
+
     class Media:
         js = (
             "admin/js/jquery.init.js",
