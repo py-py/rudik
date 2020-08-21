@@ -39,9 +39,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_extensions",
     "django_filters",
+    "pyrudik.django",
     "rest_framework",
     "mptt",
-    "colorfield",
     "core",
     "product",
 ]
