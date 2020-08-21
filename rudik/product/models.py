@@ -73,7 +73,6 @@ class Category(TimeStampedModel, MPTTModel):
 
 class Product(TimeStampedModel, models.Model):
     name = models.CharField(max_length=256)
-    slug = models.SlugField()
     category = models.ForeignKey(
         "product.Category", on_delete=models.PROTECT, related_name="products"
     )

@@ -92,7 +92,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("name", models.CharField(max_length=256)),
-                ("slug", models.SlugField()),
                 ("price", models.DecimalField(decimal_places=2, max_digits=8)),
                 ("delivery_price", models.DecimalField(decimal_places=2, max_digits=8)),
                 ("purchase_price", models.DecimalField(decimal_places=2, max_digits=8)),
