@@ -1,24 +1,15 @@
 import os
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from mptt.fields import TreeForeignKey
 from mptt.models import MPTTModel
 
-from pyrudik.django.fields import ColorField
-
 
 def upload_to(instance, filename):
     return os.path.join(instance.upload_folder, filename)
-
-
-class Color(models.Model):
-    name = models.CharField(max_length=256)
-    color = ColorField(default="#FFFFFF")
-
-    def __str__(self):
-        return self.name
 
 
 class AbstractImage(TimeStampedModel, models.Model):
@@ -77,25 +68,14 @@ class Product(TimeStampedModel, models.Model):
     category = models.ForeignKey(
         "product.Category", on_delete=models.PROTECT, related_name="products"
     )
-    color = models.ForeignKey("product.Color", on_delete=models.PROTECT, related_name="products")
-    price = models.DecimalField(max_digits=8, decimal_places=2)
-    delivery_price = models.DecimalField(max_digits=8, decimal_places=2)
-    purchase_price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
         return self.name
 
-    @property
-    def cost(self):
-        return self.purchase_price + self.delivery_price
-
-    @property
-    def margin(self):
-        return self.price - self.cost
-
 
 class ConfigurationType(TimeStampedModel, models.Model):
     name = models.CharField(max_length=256)
+    is_color = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -103,10 +83,15 @@ class ConfigurationType(TimeStampedModel, models.Model):
 
 class Configuration(TimeStampedModel, models.Model):
     type = models.ForeignKey("product.ConfigurationType", on_delete=models.CASCADE)
+    name = models.CharField(max_length=256, null=True, blank=True)
     value = models.CharField(max_length=256)
 
     def __str__(self):
         return "{} ({})".format(self.type.name, self.value)
+
+    def clean(self):
+        if self.type.is_color and not self.name:
+            raise ValidationError({"name": _("This field is required.")})
 
 
 class ProductVariant(TimeStampedModel, models.Model):
@@ -115,6 +100,17 @@ class ProductVariant(TimeStampedModel, models.Model):
     )
     configurations = models.ManyToManyField("product.Configuration")
     qty = models.PositiveSmallIntegerField()
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    delivery_price = models.DecimalField(max_digits=8, decimal_places=2)
+    purchase_price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
         return self.product.name
+
+    @property
+    def cost(self):
+        return self.purchase_price + self.delivery_price
+
+    @property
+    def margin(self):
+        return self.price - self.cost

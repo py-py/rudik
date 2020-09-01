@@ -13,13 +13,13 @@ class ProductVariantModelForm(forms.ModelForm):
         fields = "__all__"
 
     def clean(self):
-        configs = self.cleaned_data["configurations"]
+        qs = self.cleaned_data["configurations"]
         duplicates = [
             config
-            for config in configs.values(name=F("type__name")).annotate(count=Count("type"))
+            for config in qs.values(type_name=F("type__name")).annotate(count=Count("type_name"))
             if config["count"] > 1
         ]
         if duplicates:
-            names = ", ".join(d["name"] for d in duplicates)
+            names = ", ".join(d["type_name"] for d in duplicates)
             error = _("Forbidden to select the same configuration types: {}.").format(names)
             raise ValidationError({"configurations": error})

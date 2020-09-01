@@ -1,4 +1,7 @@
 from django.contrib import admin
+from django.http import JsonResponse
+from django.urls import path
+from django.urls import reverse
 from mptt.admin import MPTTModelAdmin
 
 from rudik.admin import rudik_site
@@ -6,7 +9,6 @@ from rudik.admin import rudik_site
 from .forms import ProductVariantModelForm
 from .models import Category
 from .models import CategoryImage
-from .models import Color
 from .models import Configuration
 from .models import ConfigurationType
 from .models import Product
@@ -24,11 +26,6 @@ class ImageMixin(object):
             "admin/js/jquery.init.js",
             "product/js/is_default.js",
         )
-
-
-@admin.register(Color, site=rudik_site)
-class ColorAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "color"]
 
 
 class CategoryImageTabularInline(ImageMixin, admin.TabularInline):
@@ -58,7 +55,29 @@ class ConfigurationTypeAdmin(admin.ModelAdmin):
 
 @admin.register(Configuration, site=rudik_site)
 class ConfigurationAdmin(admin.ModelAdmin):
-    pass
+    class Media:
+        js = (
+            "admin/js/jquery.init.js",
+            "configuration/js/change_type.js",
+        )
+
+    def get_urls(self):
+        urls = super(ConfigurationAdmin, self).get_urls()
+        return [path("is_color/", self.is_color_type, name="is_color_type")] + urls
+
+    def get_form(self, request, obj=None, change=False, **kwargs):
+        form = super(ConfigurationAdmin, self).get_form(request, obj, change, **kwargs)
+        form.base_fields["type"].widget.attrs["data-url"] = reverse("admin:is_color_type")
+        return form
+
+    def is_color_type(self, request):
+        try:
+            type_id = int(request.GET["type_id"])
+            config_type = ConfigurationType.objects.get(id=type_id)
+            is_color = config_type.is_color
+        except Exception:
+            is_color = False
+        return JsonResponse({"isColor": is_color})
 
 
 @admin.register(ProductVariant, site=rudik_site)
