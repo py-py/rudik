@@ -82,7 +82,7 @@ class ConfigurationAdmin(admin.ModelAdmin):
 
 @admin.register(ProductVariant, site=rudik_site)
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ["__str__", "configs", "qty"]
+    list_display = ["__str__", "configs", "qty", "price", "cost", "margin"]
     form = ProductVariantModelForm
 
     def configs(self, obj):
