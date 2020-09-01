@@ -87,7 +87,7 @@ class Configuration(TimeStampedModel, models.Model):
     value = models.CharField(max_length=256)
 
     def __str__(self):
-        return "{} ({})".format(self.type.name, self.value)
+        return "{} ({})".format(self.type.name, self.name or self.value)
 
     def clean(self):
         if self.type.is_color and not self.name:
