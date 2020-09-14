@@ -105,7 +105,13 @@ class ProductVariant(TimeStampedModel, models.Model):
     purchase_price = models.DecimalField(max_digits=8, decimal_places=2)
 
     def __str__(self):
-        return self.product.name
+        params = {}
+        for config in self.configurations.all():
+            params[config.type.name] = config.name if config.type.is_color else config.value
+        return "{} ({})".format(
+            self.product.name,
+            ", ".join(["{}={}".format(key, value) for key, value in params.items()]),
+        )
 
     @property
     def cost(self):
