@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "mptt",
     "core",
     "product",
+    "order",
 ]
 
 MIDDLEWARE = [

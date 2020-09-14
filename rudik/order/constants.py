@@ -23,3 +23,7 @@ DELIVERY_TYPES = (
     (DELIVERY_COMPANY_BRANCH, _("Branch")),
     (DELIVERY_COMPANY_CURRIER, _("Currier")),
 )
+
+STATUS_NEW = 1
+
+STATUSES = ((STATUS_NEW, _("New")),)
