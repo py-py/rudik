@@ -27,10 +27,13 @@ class Recipient(TimeStampedModel, models.Model):
         return self.phone.as_international
 
 
-class ProductOrder(TimeStampedModel, models.Model):
-    product = models.ForeignKey("product.Product", on_delete=models.CASCADE)
+class ProductVariantOrder(TimeStampedModel, models.Model):
+    product_variant = models.ForeignKey("product.ProductVariant", on_delete=models.CASCADE)
     order = models.ForeignKey("order.Order", on_delete=models.CASCADE)
     qty = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
+
+    class Meta:
+        unique_together = ("product_variant", "order")
 
 
 class Order(TimeStampedModel, models.Model):
@@ -53,7 +56,9 @@ class Order(TimeStampedModel, models.Model):
     comment = models.TextField(null=True, blank=True)
     dont_call = models.BooleanField(default=False)
     status = models.PositiveSmallIntegerField(choices=STATUSES, default=STATUS_NEW)
-    products = models.ManyToManyField("product.Product", through="order.ProductOrder")
+    products = models.ManyToManyField(
+        "product.ProductVariant", through="order.ProductVariantOrder", related_name="orders"
+    )
 
     class Meta:
         verbose_name = _("Order")
