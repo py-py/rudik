@@ -32,13 +32,17 @@ class Recipient(TimeStampedModel, models.Model):
         return recipient
 
 
-class ProductVariantOrder(TimeStampedModel, models.Model):
+class OrderItem(TimeStampedModel, models.Model):
     product_variant = models.ForeignKey("product.ProductVariant", on_delete=models.CASCADE)
-    order = models.ForeignKey("order.Order", on_delete=models.CASCADE)
+    order = models.ForeignKey("order.Order", on_delete=models.CASCADE, related_name="items")
     qty = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     class Meta:
         unique_together = ("product_variant", "order")
+
+    def clean(self):
+        if self.product_variant.count_rest() < self.qty:
+            raise ValidationError({"qty": _("Not enough in warehouse.")})
 
 
 class Order(TimeStampedModel, models.Model):
@@ -62,7 +66,7 @@ class Order(TimeStampedModel, models.Model):
     dont_call = models.BooleanField(default=False)
     status = models.PositiveSmallIntegerField(choices=STATUSES, default=STATUS_NEW)
     products = models.ManyToManyField(
-        "product.ProductVariant", through="order.ProductVariantOrder", related_name="orders"
+        "product.ProductVariant", through="order.OrderItem", related_name="orders"
     )
 
     class Meta:

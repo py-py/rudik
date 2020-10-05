@@ -120,3 +120,10 @@ class ProductVariant(TimeStampedModel, models.Model):
     @property
     def margin(self):
         return self.price - self.cost
+
+    def count_order_qty(self):
+        # TODO: count for specific status ?
+        return sum(self.orderitem_set.values_list("qty", flat=True))
+
+    def count_rest(self):
+        return self.qty - self.count_order_qty()

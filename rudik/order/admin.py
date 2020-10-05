@@ -8,12 +8,12 @@ from django.db.models import Sum
 from rudik.admin import rudik_site
 
 from .models import Order
-from .models import ProductVariantOrder
+from .models import OrderItem
 from .models import Recipient
 
 
 class ProductTabularInline(admin.TabularInline):
-    model = ProductVariantOrder
+    model = OrderItem
     extra = 0
 
 
@@ -25,7 +25,7 @@ class OrderModelAdmin(admin.ModelAdmin):
     list_filter = ["status"]
 
     def amount(self, order):
-        data = order.productvariantorder_set.aggregate(
+        data = order.orderitem_set.aggregate(
             amount=Sum(F("qty") * F("product_variant__price"), output_field=DecimalField())
         )
         return Decimal(data["amount"]).quantize(Decimal(".01"))
