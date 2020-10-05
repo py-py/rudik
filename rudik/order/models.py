@@ -26,6 +26,11 @@ class Recipient(TimeStampedModel, models.Model):
     def __str__(self):
         return self.phone.as_international
 
+    @classmethod
+    def create_recipient(cls, phone, kwargs):
+        recipient, _ = cls.objects.update_or_create(phone=phone, defaults=kwargs)
+        return recipient
+
 
 class ProductVariantOrder(TimeStampedModel, models.Model):
     product_variant = models.ForeignKey("product.ProductVariant", on_delete=models.CASCADE)
@@ -45,9 +50,9 @@ class Order(TimeStampedModel, models.Model):
         blank=True,
         related_name="secondary_orders",
     )
-    payment_type = models.PositiveSmallIntegerField(choices=PAYMENT_TYPES)
     delivery_company = models.PositiveSmallIntegerField(choices=DELIVERY_COMPANIES)
     delivery_type = models.PositiveSmallIntegerField(choices=DELIVERY_TYPES)
+    payment_type = models.PositiveSmallIntegerField(choices=PAYMENT_TYPES)
     branch = models.CharField(max_length=256)
 
     region = models.CharField(max_length=256)

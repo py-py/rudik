@@ -7,6 +7,7 @@ from .admin import rudik_site
 
 api_urlpatterns = [
     path("product/", include("product.urls")),
+    path("order/", include("order.urls")),
 ]
 
 urlpatterns = [
