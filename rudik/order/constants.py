@@ -25,5 +25,21 @@ DELIVERY_TYPES = (
 )
 
 STATUS_NEW = 1
+STATUS_COULD_NOT_CALL = 2
+STATUS_APPROVED = 3
+STATUS_WAIT_FOR_PAYMENT = 4
+STATUS_COMPLETED = 5
+STATUS_PAID = 6
+STATUS_CANCELED = 7
+STATUS_RETURNED = 8
 
-STATUSES = ((STATUS_NEW, _("New")),)
+STATUSES = (
+    (STATUS_NEW, _("New")),
+    (STATUS_COULD_NOT_CALL, _("Didn't call")),
+    (STATUS_APPROVED, _("Approved")),
+    (STATUS_WAIT_FOR_PAYMENT, _("Wait for payment")),
+    (STATUS_COMPLETED, _("Completed")),
+    (STATUS_PAID, _("Paid")),
+    (STATUS_CANCELED, _("Canceled")),
+    (STATUS_RETURNED, _("Returned")),
+)

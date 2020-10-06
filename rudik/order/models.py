@@ -31,6 +31,9 @@ class Recipient(TimeStampedModel, models.Model):
         recipient, _ = cls.objects.update_or_create(phone=phone, defaults=kwargs)
         return recipient
 
+    def count_orders(self):
+        return self.orders.count()
+
 
 class OrderItem(TimeStampedModel, models.Model):
     product_variant = models.ForeignKey("product.ProductVariant", on_delete=models.CASCADE)
@@ -46,7 +49,9 @@ class OrderItem(TimeStampedModel, models.Model):
 
 
 class Order(TimeStampedModel, models.Model):
-    recipient = models.ForeignKey("order.Recipient", on_delete=models.PROTECT)
+    recipient = models.ForeignKey(
+        "order.Recipient", on_delete=models.PROTECT, related_name="orders"
+    )
     second_recipient = models.ForeignKey(
         "order.Recipient",
         on_delete=models.PROTECT,
