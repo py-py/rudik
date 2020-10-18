@@ -17,11 +17,12 @@ class PreviewMixin(object):
         return readonly_fields
 
     def preview(self, obj):
-        try:
-            img_url = self.get_image_url(obj)
-        except Exception as e:
-            log.exception(e)
-            img_url = static("images/not_found_image.jpg")
+        img_url = static("images/not_found_image.jpg")
+        if obj.id:
+            try:
+                img_url = self.get_image_url(obj)
+            except Exception as e:
+                log.info(e)
         return mark_safe(
             '<a href="{img_url}">'
             '<image src="{img_url}" height="{img_height}"/>'

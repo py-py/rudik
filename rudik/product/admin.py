@@ -7,6 +7,7 @@ from mptt.admin import MPTTModelAdmin
 from core.admin import PreviewMixin
 from rudik.admin import rudik_site
 
+from .forms import ImageInlineFormset
 from .forms import ProductVariantModelForm
 from .models import Category
 from .models import CategoryImage
@@ -19,6 +20,8 @@ from .models import ProductVariantImage
 
 
 class ImageMixin(object):
+    formset = ImageInlineFormset
+
     def get_queryset(self, request):
         qs = super(ImageMixin, self).get_queryset(request)
         return qs.order_by("-is_default")
