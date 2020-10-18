@@ -34,6 +34,26 @@ class OrderModelAdmin(admin.ModelAdmin):
     list_display = ["__str__", "recipient", "status", "amount", "created"]
     list_editable = ["status"]
     list_filter = ["status"]
+    readonly_fields = ["amount", "dont_call"]
+
+    fieldsets = [
+        [_("Main"), {"fields": ["amount", "status", "dont_call"], "classes": ["required"]}],
+        [_("Recipient"), {"fields": ["recipient", "second_recipient"]}],
+        [
+            _("Delivery"),
+            {
+                "fields": [
+                    "delivery_company",
+                    "delivery_type",
+                    "payment_type",
+                    "branch",
+                    "region",
+                    "city",
+                ]
+            },
+        ],
+        [_("Comment"), {"fields": ["comment"]}],
+    ]
 
     def amount(self, order):
         data = order.items.aggregate(
