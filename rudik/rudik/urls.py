@@ -10,7 +10,8 @@ api_urlpatterns = [
     path("order/", include("order.urls")),
 ]
 
-urlpatterns = [
-    path("admin/", rudik_site.urls),
-    path("api/v1/", include(api_urlpatterns)),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = (
+    [path("admin/", rudik_site.urls), path("api/v1/", include(api_urlpatterns))]
+    + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+)

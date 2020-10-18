@@ -6,6 +6,7 @@ from django.db.models import F
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 
+from core.admin import PreviewMixin
 from rudik.admin import rudik_site
 
 from .models import Order
@@ -13,7 +14,7 @@ from .models import OrderItem
 from .models import Recipient
 
 
-class OrderItemTabularInline(admin.TabularInline):
+class OrderItemTabularInline(PreviewMixin, admin.TabularInline):
     model = OrderItem
     extra = 0
     readonly_fields = ["price_per_item"]
@@ -22,6 +23,9 @@ class OrderItemTabularInline(admin.TabularInline):
         return item.product_variant.price
 
     price_per_item.short_description = _("Price Per Item")
+
+    def get_image_url(self, order_item):
+        return order_item.product_variant.images.get(is_default=True).image.url
 
 
 @admin.register(Order, site=rudik_site)

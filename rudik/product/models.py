@@ -49,6 +49,15 @@ class ProductImage(AbstractImage):
     product = models.ForeignKey("product.Product", on_delete=models.CASCADE, related_name="images")
 
 
+class ProductVariantImage(AbstractImage):
+    upload_folder = "product_variant"
+    fk_field = "product_variant"
+
+    product_variant = models.ForeignKey(
+        "product.ProductVariant", on_delete=models.CASCADE, related_name="images"
+    )
+
+
 class Category(TimeStampedModel, MPTTModel):
     name = models.CharField(max_length=256, unique=True)
     parent = TreeForeignKey(

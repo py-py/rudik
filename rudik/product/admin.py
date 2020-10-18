@@ -4,6 +4,7 @@ from django.urls import path
 from django.urls import reverse
 from mptt.admin import MPTTModelAdmin
 
+from core.admin import PreviewMixin
 from rudik.admin import rudik_site
 
 from .forms import ProductVariantModelForm
@@ -14,6 +15,7 @@ from .models import ConfigurationType
 from .models import Product
 from .models import ProductImage
 from .models import ProductVariant
+from .models import ProductVariantImage
 
 
 class ImageMixin(object):
@@ -28,7 +30,7 @@ class ImageMixin(object):
         )
 
 
-class CategoryImageTabularInline(ImageMixin, admin.TabularInline):
+class CategoryImageTabularInline(PreviewMixin, ImageMixin, admin.TabularInline):
     model = CategoryImage
     extra = 1
 
@@ -38,8 +40,13 @@ class CategoryAdmin(MPTTModelAdmin):
     inlines = [CategoryImageTabularInline]
 
 
-class ProductImageTabularInline(ImageMixin, admin.TabularInline):
+class ProductImageTabularInline(PreviewMixin, ImageMixin, admin.TabularInline):
     model = ProductImage
+    extra = 1
+
+
+class ProductVariantImageTabularInline(PreviewMixin, ImageMixin, admin.TabularInline):
+    model = ProductVariantImage
     extra = 1
 
 
@@ -84,6 +91,7 @@ class ConfigurationAdmin(admin.ModelAdmin):
 class ProductVariantAdmin(admin.ModelAdmin):
     list_display = ["__str__", "configs", "qty", "price", "cost", "margin"]
     form = ProductVariantModelForm
+    inlines = [ProductVariantImageTabularInline]
 
     def configs(self, obj):
         return ", ".join(str(config) for config in obj.configurations.all())
