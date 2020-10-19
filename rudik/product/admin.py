@@ -4,7 +4,7 @@ from django.urls import path
 from django.urls import reverse
 from mptt.admin import MPTTModelAdmin
 
-from core.admin import PreviewMixin
+from core.admin import PreviewSingleObjectMixin
 from rudik.admin import rudik_site
 
 from .forms import ImageInlineFormset
@@ -33,7 +33,7 @@ class ImageMixin(object):
         )
 
 
-class CategoryImageTabularInline(PreviewMixin, ImageMixin, admin.TabularInline):
+class CategoryImageTabularInline(PreviewSingleObjectMixin, ImageMixin, admin.TabularInline):
     model = CategoryImage
     extra = 1
 
@@ -43,12 +43,12 @@ class CategoryAdmin(MPTTModelAdmin):
     inlines = [CategoryImageTabularInline]
 
 
-class ProductImageTabularInline(PreviewMixin, ImageMixin, admin.TabularInline):
+class ProductImageTabularInline(PreviewSingleObjectMixin, ImageMixin, admin.TabularInline):
     model = ProductImage
     extra = 1
 
 
-class ProductVariantImageTabularInline(PreviewMixin, ImageMixin, admin.TabularInline):
+class ProductVariantImageTabularInline(PreviewSingleObjectMixin, ImageMixin, admin.TabularInline):
     model = ProductVariantImage
     extra = 1
 

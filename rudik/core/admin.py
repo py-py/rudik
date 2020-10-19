@@ -7,11 +7,11 @@ from django.utils.translation import ugettext_lazy as _
 log = logging.getLogger(__name__)
 
 
-class PreviewMixin(object):
+class PreviewSingleObjectMixin(object):
     img_height = 80
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super(PreviewMixin, self).get_readonly_fields(request, obj)
+        readonly_fields = super(PreviewSingleObjectMixin, self).get_readonly_fields(request, obj)
         if "preview" not in readonly_fields:
             readonly_fields += ("preview",)
         return readonly_fields

@@ -6,7 +6,7 @@ from django.db.models import F
 from django.db.models import Sum
 from django.utils.translation import ugettext_lazy as _
 
-from core.admin import PreviewMixin
+from core.admin import PreviewSingleObjectMixin
 from rudik.admin import rudik_site
 
 from .models import Order
@@ -14,7 +14,7 @@ from .models import OrderItem
 from .models import Recipient
 
 
-class OrderItemTabularInline(PreviewMixin, admin.TabularInline):
+class OrderItemTabularInline(PreviewSingleObjectMixin, admin.TabularInline):
     model = OrderItem
     extra = 0
     readonly_fields = ["price_per_item"]
