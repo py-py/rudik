@@ -26,6 +26,9 @@ class Recipient(TimeStampedModel, models.Model):
     def __str__(self):
         return self.phone.as_international
 
+    def get_name(self):
+        return "{} {}".format(self.first_name, self.second_name)
+
     @classmethod
     def create_recipient(cls, phone, kwargs):
         recipient, _ = cls.objects.update_or_create(phone=phone, defaults=kwargs)

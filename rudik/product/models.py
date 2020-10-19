@@ -136,3 +136,8 @@ class ProductVariant(TimeStampedModel, models.Model):
 
     def count_rest(self):
         return self.qty - self.count_order_qty()
+
+    @property
+    def default_image(self):
+        image = self.images.get(is_default=True)
+        return image.image
