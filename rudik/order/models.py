@@ -5,9 +5,12 @@ from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from phonenumber_field.modelfields import PhoneNumberField
 
+from .clients import SendPulseClient
 from .constants import DELIVERY_COMPANIES
 from .constants import DELIVERY_COMPANY_UKRPOSHTA
 from .constants import DELIVERY_TYPES
+from .constants import NOTIFICATION_TYPE_SMS
+from .constants import NOTIFICATION_TYPES
 from .constants import PAYMENT_TYPES
 from .constants import STATUS_NEW
 from .constants import STATUSES
@@ -88,3 +91,32 @@ class Order(TimeStampedModel, models.Model):
         if self.delivery_company == DELIVERY_COMPANY_UKRPOSHTA:
             if not self.region:
                 raise ValidationError({"region": _("This field is required.")})
+
+    def get_recipient_phone(self):
+        if self.second_recipient:
+            return self.second_recipient.phone
+        return self.recipient.phone
+
+
+class Notification(TimeStampedModel, models.Model):
+    order = models.ForeignKey(
+        "order.Order", on_delete=models.CASCADE, related_name="notifications"
+    )
+    notification_type = models.PositiveSmallIntegerField(
+        choices=NOTIFICATION_TYPES, default=NOTIFICATION_TYPE_SMS
+    )
+    text = models.TextField()
+    is_sent = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = _("Notification")
+        verbose_name_plural = _("Notifications")
+
+    @property
+    def client(self):
+        return SendPulseClient()
+
+    def emit(self):
+        self.client.send_sms()
+        self.is_sent = True
+        self.save(update_fields=["is_sent"])
