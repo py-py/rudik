@@ -1,6 +1,7 @@
-from pyrudik.common.sessions import BaseUrlSession
 from django.conf import settings
 from memoize import memoize
+
+from pyrudik.common.sessions import BaseUrlSession
 
 
 class NovaPoshtaSession(BaseUrlSession):
