@@ -26,7 +26,8 @@ class EPochtaSession(BaseUrlSession):
         self.update_params(url, params)
         response = super(EPochtaSession, self).request(method, url, *args, **kwargs)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        return data["result"]
 
 
 class EPochtaClient:

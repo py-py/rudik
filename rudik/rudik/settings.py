@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "pyrudik.django",
     "rest_framework",
     "mptt",
+    "rudik",
     "core",
     "product",
     "order",
