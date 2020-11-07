@@ -128,4 +128,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "rudik", "static")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "rudik", "media")
 
-NOVAPOSTA_TOKEN = os.getenv("NOVAPOSTA_TOKEN", "107db97c4152715e5bd20bee21d3306e")
+NOVAPOSTA_TOKEN = os.getenv("NOVAPOSTA_TOKEN")
+EPOSHTA_PUBLIC_TOKEN = os.getenv("EPOSHTA_PUBLIC_TOKEN")
+EPOSHTA_PRIVATE_TOKEN = os.getenv("EPOSHTA_PRIVATE_TOKEN")

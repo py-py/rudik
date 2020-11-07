@@ -1,1 +1,2 @@
-from .nova_poshta import NovaPoshtaClient  # NOQA: F401
+from .epochta import EPochtaClient  # NOQA: F401
+from .novaposhta import NovaPoshtaClient  # NOQA: F401
