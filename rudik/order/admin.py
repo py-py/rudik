@@ -1,9 +1,4 @@
-from decimal import Decimal
-
 from django.contrib import admin
-from django.db.models import DecimalField
-from django.db.models import F
-from django.db.models import Sum
 from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
 from django.urls import path
@@ -71,13 +66,6 @@ class OrderModelAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super(OrderModelAdmin, self).get_queryset(request)
         return queryset.order_by("-id")
-
-    @staticmethod
-    def amount(order):
-        data = order.items.aggregate(
-            amount=Sum(F("qty") * F("product_variant__price"), output_field=DecimalField())
-        )
-        return Decimal(data["amount"]).quantize(Decimal(".01"))
 
     @staticmethod
     def previews(order):

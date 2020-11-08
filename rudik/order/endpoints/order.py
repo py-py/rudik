@@ -84,6 +84,7 @@ class OrderSerializer(serializers.ModelSerializer):
             order = super(OrderSerializer, self).create(validated_data)
             for item_data in items:
                 OrderItem.objects.create(order=order, **item_data)
+            order.notify()
             return order
 
     @staticmethod

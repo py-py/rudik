@@ -1,11 +1,17 @@
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import DecimalField
+from django.db.models import F
+from django.db.models import Sum
+from django.template.loader import render_to_string
+from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
 from phonenumber_field.modelfields import PhoneNumberField
 
-from .clients import SendPulseClient
 from .constants import DELIVERY_COMPANIES
 from .constants import DELIVERY_COMPANY_UKRPOSHTA
 from .constants import DELIVERY_TYPES
@@ -13,7 +19,9 @@ from .constants import NOTIFICATION_TYPE_SMS
 from .constants import NOTIFICATION_TYPES
 from .constants import PAYMENT_TYPES
 from .constants import STATUS_NEW
+from .constants import STATUS_WAIT_FOR_PAYMENT
 from .constants import STATUSES
+from .integrations import EPochtaClient
 
 
 class Recipient(TimeStampedModel, models.Model):
@@ -68,10 +76,11 @@ class Order(TimeStampedModel, models.Model):
     delivery_company = models.PositiveSmallIntegerField(choices=DELIVERY_COMPANIES)
     delivery_type = models.PositiveSmallIntegerField(choices=DELIVERY_TYPES)
     payment_type = models.PositiveSmallIntegerField(choices=PAYMENT_TYPES)
-    branch = models.CharField(max_length=256)
+    ttn = models.CharField(max_length=64, null=True, blank=True)
 
     region = models.CharField(max_length=256)
     city = models.CharField(max_length=256)
+    branch = models.CharField(max_length=256)
 
     comment = models.TextField(null=True, blank=True)
     dont_call = models.BooleanField(default=False)
@@ -92,10 +101,21 @@ class Order(TimeStampedModel, models.Model):
             if not self.region:
                 raise ValidationError({"region": _("This field is required.")})
 
+    @cached_property
+    def amount(self):
+        data = self.items.aggregate(
+            amount=Sum(F("qty") * F("product_variant__price"), output_field=DecimalField())
+        )
+        return Decimal(data["amount"]).quantize(Decimal(".01"))
+
     def get_recipient_phone(self):
         if self.second_recipient:
             return self.second_recipient.phone
         return self.recipient.phone
+
+    def notify(self):
+        notification = self.notifications.create(notification_type=NOTIFICATION_TYPE_SMS)
+        notification.do_emit()
 
 
 class Notification(TimeStampedModel, models.Model):
@@ -106,7 +126,9 @@ class Notification(TimeStampedModel, models.Model):
         choices=NOTIFICATION_TYPES, default=NOTIFICATION_TYPE_SMS
     )
     text = models.TextField()
+    campaign_id = models.CharField(max_length=65, null=True, blank=True)
     is_sent = models.BooleanField(default=False)
+    is_delivered = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = _("Notification")
@@ -114,9 +136,40 @@ class Notification(TimeStampedModel, models.Model):
 
     @property
     def client(self):
-        return SendPulseClient()
+        return EPochtaClient()
 
-    def emit(self):
-        self.client.send_sms()
-        self.is_sent = True
-        self.save(update_fields=["is_sent"])
+    def do_emit(self):
+        if self.notification_type == NOTIFICATION_TYPE_SMS and self.is_emitted():
+            phone = self.order.get_recipient_phone()
+            template = self.get_sms_template()
+            text = render_to_string(template, context=self.get_context()).replace("\n", " ")
+            data = self.client.send_sms(phone, text)
+            self.campaign_id = data["id"]
+            self.save(update_fields=["campaign_id"])
+
+    def get_context(self):
+        return {
+            "order_id": self.order.id,
+            "summa": self.order,
+            "ttn": self.order.ttn,
+            "card_bank": "PrivatBank",
+            "card_number": "5000400030002000",
+            "card_owner": "Ivanov I.I.",
+            "site_url": "rudik.com.ua",
+        }
+
+    def is_emitted(self):
+        if self.order.status == STATUS_NEW:
+            return True
+        elif self.order.status == STATUS_WAIT_FOR_PAYMENT:
+            return True
+        return False
+
+    def get_sms_template(self):
+        if self.order.status == STATUS_NEW:
+            template = "order/sms/new_order_ttn"
+        elif self.order.status == STATUS_WAIT_FOR_PAYMENT:
+            template = "order/sms/new_order_card"
+        else:
+            raise NotImplementedError
+        return template
