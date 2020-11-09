@@ -103,11 +103,18 @@ class RecipientModelAdmin(admin.ModelAdmin):
 @admin.register(Notification, site=rudik_site)
 class NotificationModelAdmin(admin.ModelAdmin):
     list_display = ["recipient", "notification_type", "order", "is_sent", "timestamp"]
-    readonly_fields = ["is_sent"]
+    readonly_fields = ["campaign_id", "is_sent", "is_delivered"]
+
+    fieldsets = [
+        [None, {"fields": ["order", "notification_type", "text"]}],
+        [_("Delivery Info"), {"fields": ["campaign_id", "is_sent", "is_delivered"]}],
+    ]
 
     @staticmethod
     def recipient(notification):
         return notification.order.get_recipient_phone()
+
+    recipient.short_description = _("Recipient")
 
     @staticmethod
     def timestamp(notification):
@@ -117,7 +124,7 @@ class NotificationModelAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         queryset = super(NotificationModelAdmin, self).get_queryset(request)
-        order_id = request.GET.get("order_id")
+        order_id = request.GET.get("order")
         if order_id and order_id.isdigit():
             queryset = queryset.filter(order_id=order_id)
         return queryset

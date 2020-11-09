@@ -3,7 +3,12 @@
 
 {% block object-tools-items %}
     <li>
-        <a href="{% url 'admin:order_notification_changelist' %}?order_id={{ object_id }}" >
+        <a href="{% url 'admin:order_notification_add' %}?order={{ object_id }}">
+            {% trans "Add Notification" %}
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'admin:order_notification_changelist' %}?order={{ object_id }}">
             {% trans "Notifications" %}
         </a>
     </li>
