@@ -134,6 +134,9 @@ class Notification(TimeStampedModel, models.Model):
         verbose_name = _("Notification")
         verbose_name_plural = _("Notifications")
 
+    def __str__(self):
+        return f"{self.get_notification_type_display()} to {self.order.get_recipient_phone()}"
+
     @property
     def client(self):
         return EPochtaClient()
