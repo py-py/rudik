@@ -2,6 +2,7 @@ import hashlib
 
 from django.conf import settings
 from memoize import memoize
+from requests import HTTPError
 
 from pyrudik.common.sessions import BaseUrlSession
 
@@ -28,7 +29,9 @@ class EPochtaSession(BaseUrlSession):
         response = super(EPochtaSession, self).request(method, url, *args, **kwargs)
         response.raise_for_status()
         data = response.json()
-        return data["result"]
+        if data["result"] == "false":
+            raise HTTPError(response.text, response=response)
+        return data
 
 
 class EPochtaClient:
