@@ -15,6 +15,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from .constants import DELIVERY_COMPANIES
 from .constants import DELIVERY_COMPANY_UKRPOSHTA
 from .constants import DELIVERY_TYPES
+from .constants import NOTIFICATION_TYPE_EMAIL
 from .constants import NOTIFICATION_TYPE_SMS
 from .constants import NOTIFICATION_TYPES
 from .constants import PAYMENT_TYPES
@@ -108,10 +109,11 @@ class Order(TimeStampedModel, models.Model):
         )
         return Decimal(data["amount"]).quantize(Decimal(".01"))
 
-    def get_recipient_phone(self):
+    @property
+    def main_recipient(self):
         if self.second_recipient:
-            return self.second_recipient.phone
-        return self.recipient.phone
+            return self.second_recipient
+        return self.recipient
 
     def notify(self):
         notification = self.notifications.create(notification_type=NOTIFICATION_TYPE_SMS)
@@ -135,15 +137,29 @@ class Notification(TimeStampedModel, models.Model):
         verbose_name_plural = _("Notifications")
 
     def __str__(self):
-        return f"{self.get_notification_type_display()} to {self.order.get_recipient_phone()}"
+        contact = self.get_recipient_contact()
+        return f"{self.get_notification_type_display()} to {contact}"
+
+    def clean(self):
+        if self.notification_type == NOTIFICATION_TYPE_EMAIL:
+            if not self.order.main_recipient.email:
+                raise ValidationError({"order": _("Recipient in order has not inputted email.")})
 
     @property
     def client(self):
         return EPochtaClient()
 
+    def get_recipient_contact(self):
+        if self.notification_type == NOTIFICATION_TYPE_SMS:
+            return self.order.main_recipient.phone
+        elif self.notification_type == NOTIFICATION_TYPE_EMAIL:
+            return self.order.main_recipient.email
+        else:
+            raise ValueError("Not found notification type.")
+
     def do_emit(self):
-        if self.notification_type == NOTIFICATION_TYPE_SMS and self.is_emitted():
-            phone = self.order.get_recipient_phone()
+        if self.notification_type == NOTIFICATION_TYPE_SMS and self.can_be_emitted():
+            phone = self.order.main_recipient.phone
             template = self.get_sms_template()
             text = render_to_string(template, context=self.get_context()).replace("\n", " ")
             data = self.client.send_sms(phone, text)
@@ -161,12 +177,8 @@ class Notification(TimeStampedModel, models.Model):
             "site_url": "rudik.com.ua",
         }
 
-    def is_emitted(self):
-        if self.order.status == STATUS_NEW:
-            return True
-        elif self.order.status == STATUS_WAIT_FOR_PAYMENT:
-            return True
-        return False
+    def can_be_emitted(self):
+        return self.order.status in [STATUS_NEW, STATUS_WAIT_FOR_PAYMENT]
 
     def get_sms_template(self):
         if self.order.status == STATUS_NEW:

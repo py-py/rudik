@@ -1,8 +1,5 @@
 from django.contrib import admin
-from django.http import HttpResponseRedirect
 from django.template.loader import render_to_string
-from django.urls import path
-from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from core.admin import PreviewSingleObjectMixin
@@ -72,22 +69,6 @@ class OrderModelAdmin(admin.ModelAdmin):
         context = {"items": order.items.all(), "height": 100}
         return render_to_string("order/admin/previews.html", context=context)
 
-    def get_urls(self):
-        urls = super(OrderModelAdmin, self).get_urls()
-        info = self.model._meta.app_label, self.model._meta.model_name
-        return [
-            path(
-                "<path:object_id>/notifications/",
-                self.admin_site.admin_view(self.notification_view),
-                name="%s_%s_notifications" % info,
-            ),
-        ] + urls
-
-    def notification_view(self, request, *args, **kwargs):
-        url = reverse("admin:order_notification_changelist")
-        url += "?order_id={}".format(kwargs["object_id"])
-        return HttpResponseRedirect(url)
-
 
 @admin.register(Recipient, site=rudik_site)
 class RecipientModelAdmin(admin.ModelAdmin):
@@ -102,7 +83,7 @@ class RecipientModelAdmin(admin.ModelAdmin):
 
 @admin.register(Notification, site=rudik_site)
 class NotificationModelAdmin(admin.ModelAdmin):
-    list_display = ["recipient", "notification_type", "order", "is_sent", "timestamp"]
+    list_display = ["__str__", "contact", "notification_type", "order", "is_sent", "timestamp"]
     readonly_fields = ["campaign_id", "is_sent", "is_delivered"]
 
     fieldsets = [
@@ -111,10 +92,10 @@ class NotificationModelAdmin(admin.ModelAdmin):
     ]
 
     @staticmethod
-    def recipient(notification):
-        return notification.order.get_recipient_phone()
+    def contact(notification):
+        return notification.get_recipient_contact()
 
-    recipient.short_description = _("Recipient")
+    contact.short_description = _("Contact")
 
     @staticmethod
     def timestamp(notification):

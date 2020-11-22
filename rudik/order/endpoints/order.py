@@ -80,6 +80,7 @@ class OrderSerializer(serializers.ModelSerializer):
             validated_data.pop("second_recipient", None)
         )
         items = validated_data.pop("items")
+        # TODO: temporary
         with transaction.atomic():
             order = super(OrderSerializer, self).create(validated_data)
             for item_data in items:
