@@ -5,7 +5,13 @@
 <div id="content-related">
     <div class="module" id="recent-actions-module">
         <h2>{% trans 'Statistics' %}</h2>
-        <p>{% trans 'E-Pochta balance' %}: <b>{{ epochta_balance|floatformat:2 }}</b> {{ epochta_currency }}</p>
+        <p>{% trans 'E-Pochta balance' %}:
+            {% if epochta_balance and epochta_currency %}
+                <b>{{ epochta_balance|floatformat:2 }}</b> {{ epochta_currency }}
+            {% else %}
+                <b>{% trans 'Not available' %}</b>
+            {% endif %}
+        </p>
         <h2>{% trans 'Recent actions' %}</h2>
             {% load log %}
             {% get_admin_log 10 as admin_log for_user user %}
