@@ -68,6 +68,10 @@ class Category(TimeStampedModel, MPTTModel):
         verbose_name = _("Category")
         verbose_name_plural = _("Categories")
 
+    def clean(self):
+        if self.parent.get_level() >= 1:
+            raise ValidationError(_("Not allowed creating category with level more than one."))
+
     def __str__(self):
         return self.name
 
