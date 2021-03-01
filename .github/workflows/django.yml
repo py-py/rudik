@@ -11,9 +11,9 @@ jobs:
 
     runs-on: ubuntu-latest
     strategy:
-      max-parallel: 2
+      max-parallel: 1
       matrix:
-        python-version: [3.7, 3.8]
+        python-version: [3.7]
 
     steps:
     - uses: actions/checkout@v2
@@ -31,4 +31,4 @@ jobs:
         python manage.py makemigrations --check
     - name: Run Flake8
       run: |
-        flake8
+        flake8 && echo Flake8 is passed
