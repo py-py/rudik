@@ -27,4 +27,4 @@ jobs:
         pip install -r requirements.txt
     - name: Run Migration Tests
       run: |
-        python manage.py makemigrations --check
+        cd ./rudik && python manage.py makemigrations --check
