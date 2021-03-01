@@ -10,6 +10,7 @@ from django.template.loader import render_to_string
 from django.utils.functional import cached_property
 from django.utils.translation import ugettext_lazy as _
 from model_utils.models import TimeStampedModel
+
 from phonenumber_field.modelfields import PhoneNumberField
 
 from .constants import DELIVERY_COMPANIES
@@ -128,7 +129,7 @@ class Notification(TimeStampedModel, models.Model):
         choices=NOTIFICATION_TYPES, default=NOTIFICATION_TYPE_SMS
     )
     text = models.TextField()
-    campaign_id = models.CharField(max_length=65, null=True, blank=True)
+    campaign_id = models.CharField(max_length=256, null=True, blank=True)
     is_sent = models.BooleanField(default=False)
     is_delivered = models.BooleanField(default=False)
 
