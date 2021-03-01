@@ -8,8 +8,8 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
+    environment: qa
     strategy:
       max-parallel: 1
       matrix:
@@ -33,3 +33,7 @@ jobs:
     - name: Run Flake8
       run: |
         flake8 && echo Flake8 is passed
+    - name: Tell about environment values
+      run: |
+        echo "${{secrets.SENTRY_KEY}}"
+        echo "${{ secrets.SENTRY_PROJECT_ID }}"
