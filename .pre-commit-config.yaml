@@ -1,0 +1,38 @@
+fail_fast: true
+repos:
+- repo: https://github.com/python/black
+  rev: 20.8b1
+  hooks:
+    - id: black
+      name: Black
+      language_version: python3
+      exclude: migrations
+      stages: [commit]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.2.0
+  hooks:
+    - id: flake8
+      name: Flake8
+      stages: [commit]
+      additional_dependencies:
+        - flake8-builtins==1.4.1
+        - flake8-print==3.1.0
+- repo: local
+  hooks:
+    - id: isort
+      name: Isort
+      language: system
+      entry: isort  # have to run isort locally since the import order is determined by venv
+      types: [python]
+      stages: [commit]
+    - id: frontend
+      name: Frontend
+      language: system
+      entry: npm run -s precommit
+      files: \.(js|ts|tsx)$
+      stages: [commit]
+    - id: message
+      name: Prepare commit message
+      language: system
+      entry: .hooks/prepare-commit-msg
+      stages: [prepare-commit-msg]

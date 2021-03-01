@@ -1,0 +1,9 @@
+<div>
+    {% for item in items %}
+        <p>
+            <a href="{% url "admin:product_productvariant_change" item.product_variant.id %}">
+                <img src="{{ item.product_variant.default_image.url }}" height="{{ height }}"/>
+            </a>
+        </p>
+    {% endfor %}
+</div>
