@@ -7,3 +7,5 @@ router = routers.DefaultRouter()
 router.register("order", OrderViewSet)
 router.register("delivery", DeliveryViewSet, basename="delivery")
 urlpatterns = router.urls
+
+x = None
