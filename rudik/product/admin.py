@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
 from django.urls import reverse
+from django.utils.safestring import mark_safe
 from mptt.admin import MPTTModelAdmin
 
 from core.admin import PreviewSingleObjectMixin
@@ -53,9 +54,19 @@ class ProductVariantImageTabularInline(PreviewSingleObjectMixin, ImageMixin, adm
     extra = 1
 
 
+class ProductVariantTabularInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 0
+
+
 @admin.register(Product, site=rudik_site)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductImageTabularInline]
+    list_filter = ["category"]
+    inlines = [ProductImageTabularInline, ProductVariantTabularInline]
+    list_display = ["__str__", "get_details"]
+
+    def get_details(self, product):
+        return mark_safe("<br>".join(map(str, product.variants.all())))
 
 
 @admin.register(ConfigurationType, site=rudik_site)
